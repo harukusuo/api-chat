@@ -1,9 +1,19 @@
-const db = require(".db");
+const db = require("./db");
+
 function listarSalas() {
     return db.findAll("salas");
 }
 
-module.exports = {listarSalas}
+/**
+ * 
+ * @param {string} nome
+ * @returns 
+ */
+function criarSala(nome) {
+    return db.insertOne("salas", { nome });
+}
+
+module.exports = { listarSalas, criarSala }
 
 /* VERSAO 1 - PAGINA 7
 

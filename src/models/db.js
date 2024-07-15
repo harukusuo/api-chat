@@ -1,7 +1,11 @@
-const { MongoClient, ObjectId} = require("mongodb");
+const { MongoClient, Db} = require("mongodb");
 
 let singleton;
 
+/**
+ * Connect to the database
+ * @returns {Promise<Db>}
+ */
 async function connect() {
     if (singleton) return singleton;
 
@@ -14,7 +18,12 @@ async function connect() {
 
 async function findAll(collection) {
     const db = await connect();
-    return db.collection(collection).findAll().toArray();
+    return db.collection(collection).find().toArray();
 }
 
-module.exports = { findAll}
+async function insertOne(collection, data) {
+    const db = await connect();
+    return db.collection(collection).insertOne(data);
+}
+
+module.exports = { findAll, insertOne }
