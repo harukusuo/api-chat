@@ -1,3 +1,12 @@
+const db = require(".db");
+function listarSalas() {
+    return db.findAll("salas");
+}
+
+module.exports = {listarSalas}
+
+/* VERSAO 1 - PAGINA 7
+
 function listarSalas() {
     return [
         {
@@ -22,4 +31,4 @@ function listarSalas() {
             "tipo": "publico"
         }
     ];
-}
+}*/
