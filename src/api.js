@@ -1,5 +1,6 @@
 const express = require("express");
 const salaController = require("./controllers/salaController");
+const mensagemController = require("./controllers/mensagemController");
 
 const app = express();
 
@@ -17,18 +18,28 @@ app.get("/sobre", (req, res) => {
     })
 });
 
+app.post("/sala/mensagem", async (req, res) => {
+    const msg = req.body; 
+    await mensagemController.put(msg);
+    const resp = {
+        "status": 200,
+        "msg": "OK"
+    }
+    res.status(200).send(resp);
+});// 
+// 
+// 
+// 
+// 
+// 
+
 app.get("/salas", async (req, res) => {
-    const resp = await salaController.get();
+    const resp = await salaController.get(); // this line .. wait for the get thingy to be ready ..
     res.status(200).send(resp);
 });
 
-app.post("/salas", async (req, res) => {
-    const nome = req.body.nome;
-    console.log(`Criando sala "${nome}"`);
 
-    const resp = await salaController.create(nome);
 
-    res.status(201).send(resp);
-});
+
 
 module.exports = app;
