@@ -16,18 +16,19 @@ app.get("/sobre", (req, res) => {
         "nome": "API CHAT",
         "versão": "0.1.0",
         "autor": "Sarah"
-    })
+    });
 });
 
 // pt 3
-app.use("/sala/mensagem/", router.post("/sala/mensagem", async (req, res) => {
-    if(!token.checkToken(req.headers.token,req.headers.iduser,req.headers.nick)) return false;
-    let resp= await salaController.enviarMensagem(req.headers.nick, req.body.msg,req.body.idSala);
+app.post("/sala/mensagem", async (req, res) => {
+    if(!tokens.checkToken(req.headers.token, req.headers.iduser, req.headers.nick)) return res.status(401).send({ msg: "Usuário não autorizado" });
+    let resp = await salaController.enviarMensagem(req.headers.nick, req.body.msg, req.body.idSala);
     res.status(200).send(resp);
-  }))
+});
+
 // .
 
-app.get("/salas", router.get("/salas", async (req, res) => {
+app.get("/salas", async (req, res) => {
     const tokenOk = await tokens.checkToken(req.headers.token, req.headers.iduser, req.headers.nick);
     if (tokenOk) {
         let resp = await salaController.get();
@@ -35,30 +36,28 @@ app.get("/salas", router.get("/salas", async (req, res) => {
     } else {
         res.status(400).send({ msg: "Usuário não autorizado" });
     }
-}))
+});
 
-//pt 3
-app.use("/entrar", router.post("/entrar", async (req, res, next) => {
+// pt 3
+app.post("/entrar", async (req, res) => {
     const usuarioController = require("./controllers/usuarioController");
     let resp = await usuarioController.entrar(req.body.nick);
     res.status(200).send(resp);
-}));
+});
 
-app.use("/sala/entrar", router.put("/sala/entrar", async (req, res)=>{
+app.put("/sala/entrar", async (req, res) => {
     const tokenOk = await tokens.checkToken(req.headers.token, req.headers.iduser, req.headers.nick);
-    if(!tokenOk) {
-        return false;
+    if (!tokenOk) {
+        return res.status(401).send({ msg: "Usuário não autorizado" });
     }
-    let resp = await salaController.entrar(req,headers.iduser, req.query.idsala);
+    let resp = await salaController.entrar(req.headers.iduser, req.query.idsala);
     res.status(200).send(resp);
-}));
+});
 
-app.use("/sala/mensagens/", router.get("/sala/mensagens", async (req, res) => {
-    if(!token.checkToken(req.headers.token,req.headers.iduser,req.headers.nick)) return false;
-    let resp= await salaController.buscarMensagens(req.query.idSala, req.query.timestamp);
+app.get("/sala/mensagens", async (req, res) => {
+    if(!tokens.checkToken(req.headers.token, req.headers.iduser, req.headers.nick)) return res.status(401).send({ msg: "Usuário não autorizado" });
+    let resp = await salaController.buscarMensagens(req.query.idSala, req.query.timestamp);
     res.status(200).send(resp);
-  }))  
-
-// .
+});
 
 module.exports = app;
