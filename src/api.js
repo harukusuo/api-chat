@@ -1,10 +1,12 @@
 const express = require("express");
+const cors = require("cors");
 const salaController = require("./controllers/salaController");
 const mensagemController = require("./controllers/mensagemController");
 const tokens = require("./util/token");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -41,8 +43,15 @@ app.get("/salas", async (req, res) => {
 // pt 3
 app.post("/entrar", async (req, res) => {
     const usuarioController = require("./controllers/usuarioController");
-    let resp = await usuarioController.entrar(req.body.nick);
-    res.status(200).send(resp);
+    console.log("Requisição recebida para /entrar:", req.body);
+    try {
+        let resp = await usuarioController.entrar(req.body.nick);
+        console.log("Resposta do usuarioController.entrar:", resp);
+        res.status(200).send(resp);
+    } catch (error) {
+        console.error("Erro ao entrar:", error);
+        res.status(500).send({ msg: "Erro no servidor" });
+    }
 });
 
 app.put("/sala/entrar", async (req, res) => {

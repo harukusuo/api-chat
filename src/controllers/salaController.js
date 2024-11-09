@@ -1,31 +1,22 @@
-/* VERSAO 1
-
-const salaModel= require('../models/salaModel');
-
-exports.get=async(req,res)=>{
-    return {"status":"OK", "controller":"Sala"};
-} */
-
-/* VERSAO 2 - PAGINA 7 
-
-exports.get=()=>{
-    let salaModel = require('../models/salaModel');
-    return salaModel.listarSalas();
-
-}*/
-
 const salaModel = require('../models/salaModel');
 
-exports.get = async () => {
-    return await salaModel.listarSalas();
+exports.get = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const salas = await salaModel.listarSalas();
+    res.json(salas);
 }
 
-exports.create = async (nome) => {
-    return await salaModel.criarSala(nome);
+exports.create = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const nome = req.body.nome;
+    const sala = await salaModel.criarSala(nome);
+    res.json(sala);
 }
 
 // pt 3 
-exports.entrar = async (iduser, idsala) => {
+exports.entrar = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const { iduser, idsala } = req.body;
     const sala = await salaModel.buscarSala(idsala);
     let usuarioModel = require('../models/usuarioModel');
     let user = await usuarioModel.buscarUsuario(iduser);
@@ -35,35 +26,40 @@ exports.entrar = async (iduser, idsala) => {
         tipo: sala.tipo
     };
     if (await usuarioModel.alternarUsuario(user)) {
-        return {
+        res.json({
             msg: "OK",
             timestamp: Date.now()
-        };
+        });
+    } else {
+        res.status(500).json({ error: "Failed to enter room" });
     }
-    return false;
 }
 
-exports.enviarMensagem = async (nick, msg, idsala) => {
+exports.enviarMensagem = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const { nick, msg, idsala } = req.body;
     const sala = await salaModel.buscarSala(idsala);
     if (!sala.msgs) {
         sala.msgs = [];
     }
-    timestamp = Date.now()
+    const timestamp = Date.now();
     sala.msgs.push(
         {
             timestamp: timestamp,
             msg: msg,
             nick: nick
         }
-    )
+    );
     let resp = await salaModel.atualizarMensagens(sala);
-    return { "msg": "OK", "timestamp": timestamp };
+    res.json({ "msg": "OK", "timestamp": timestamp });
 }
 
-exports.buscarMensagens = async (idsala, timestamp) => {
+exports.buscarMensagens = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const { idsala, timestamp } = req.query;
     let mensagens = await salaModel.buscarMensagens(idsala, timestamp);
-    return {
+    res.json({
         "timestamp": mensagens[mensagens.length - 1].timestamp,
         "msgs": mensagens
-    };
+    });
 }
