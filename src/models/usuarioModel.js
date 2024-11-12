@@ -1,4 +1,3 @@
-// tudo pt 3
 const db = require("./db");
 
 const registrarUsuario = async (nick) => {

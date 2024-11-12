@@ -1,21 +1,18 @@
 const salaModel = require('../models/salaModel');
 
-exports.get = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+exports.get = async () => {
     const salas = await salaModel.listarSalas();
-    res.json(salas);
+    return salas;
 }
 
-exports.create = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+exports.create = async () => {
     const nome = req.body.nome;
     const sala = await salaModel.criarSala(nome);
-    res.json(sala);
+    return sala
 }
 
 // pt 3 
-exports.entrar = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+exports.entrar = async () => {
     const { iduser, idsala } = req.body;
     const sala = await salaModel.buscarSala(idsala);
     let usuarioModel = require('../models/usuarioModel');
@@ -26,19 +23,22 @@ exports.entrar = async (req, res) => {
         tipo: sala.tipo
     };
     if (await usuarioModel.alternarUsuario(user)) {
-        res.json({
+        return {
             msg: "OK",
             timestamp: Date.now()
-        });
+        };
     } else {
-        res.status(500).json({ error: "Failed to enter room" });
+        throw new Error("Failed to enter room");
     }
 }
 
-exports.enviarMensagem = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    const { nick, msg, idsala } = req.body;
-    const sala = await salaModel.buscarSala(idsala);
+exports.enviarMensagem = async (nick, msg, idSala) => {
+    const sala = await salaModel.buscarSala(idSala);
+
+    if(!sala) {
+        throw new Error("Room not found");
+    }
+
     if (!sala.msgs) {
         sala.msgs = [];
     }
@@ -51,15 +51,21 @@ exports.enviarMensagem = async (req, res) => {
         }
     );
     let resp = await salaModel.atualizarMensagens(sala);
-    res.json({ "msg": "OK", "timestamp": timestamp });
+    return { "msg": "OK", "timestamp": timestamp };
 }
 
-exports.buscarMensagens = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    const { idsala, timestamp } = req.query;
-    let mensagens = await salaModel.buscarMensagens(idsala, timestamp);
-    res.json({
+exports.buscarMensagens = async (idSala, timestamp) => {
+    let mensagens = await salaModel.buscarMensagens(idSala, timestamp);
+
+    if (!mensagens || mensagens.length == 0) {
+        return {
+            "timestamp": timestamp,
+            "msgs": []
+        }
+    }
+
+    return {
         "timestamp": mensagens[mensagens.length - 1].timestamp,
         "msgs": mensagens
-    });
+    }
 }

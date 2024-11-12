@@ -24,6 +24,7 @@ const atualizarMensagens = async (sala) => {
 
 const buscarMensagens = async (idsala, timestamp) => {
     let sala = await buscarSala(idsala);
+    console.log(sala);
     if (sala.msgs) {
         let msgs = [];
         sala.msgs.forEach((msg) => {

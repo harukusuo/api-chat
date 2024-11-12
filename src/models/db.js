@@ -1,4 +1,5 @@
 const { MongoClient, Db, ObjectId } = require("mongodb");
+const uri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
 
 let singleton;
 
@@ -9,10 +10,10 @@ let singleton;
 async function connect() {
     if (singleton) return singleton;
 
-    const client = new MongoClient(process.env.DB_HOST);
+    const client = new MongoClient(uri);
     await client.connect();
 
-    singleton = client.db(process.env.DB_DATABASE);
+    singleton = client.db('chat');
     return singleton;
 }
 
@@ -23,28 +24,29 @@ async function findAll(collection) {
 
 async function insertOne(collection, data) {
     const db = await connect();
-    return db.collection(collection).insertOne(data);
+    const result = await db.collection(collection).insertOne(data);
+    return result;
 }
 
 // pt 3
-let findOne = async (collection, _id)=>{
+let findOne = async (collection, _id) => {
     const db = await connect();
-    let obj= await db.collection(collection).find({'_id':new ObjectId(_id)}).toArray();
-    if(obj)
-      return obj[0];
+    let obj = await db.collection(collection).find({ '_id': new ObjectId(_id) }).toArray();
+    if (obj)
+        return obj[0];
     return false;
-  }
-  
-  let updateOne= async (collection, object, param)=>{
+}
+
+let updateOne = async (collection, object, param) => {
     const db = await connect();
-    let result= await db.collection(collection).updateOne(param, { $set: object} );
+    let result = await db.collection(collection).updateOne(param, { $set: object });
     return result;
-  }
-  
+}
+
 // .
 
 module.exports = {
-    findAll, 
+    findAll,
     insertOne,
     findOne,
     updateOne

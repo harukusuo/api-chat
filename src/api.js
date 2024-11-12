@@ -23,9 +23,15 @@ app.get("/sobre", (req, res) => {
 
 // pt 3
 app.post("/sala/mensagem", async (req, res) => {
-    if(!tokens.checkToken(req.headers.token, req.headers.iduser, req.headers.nick)) return res.status(401).send({ msg: "Usuário não autorizado" });
-    let resp = await salaController.enviarMensagem(req.headers.nick, req.body.msg, req.body.idSala);
-    res.status(200).send(resp);
+    if(!tokens.checkToken(req.headers.token, req.headers.iduser, req.headers.nick))
+        return res.status(401).send({ msg: "Usuário não autorizado" });
+    try {
+        let resp = await salaController.enviarMensagem(req.headers.nick, req.body.msg, req.body.idSala);
+        res.status(200).send(resp);
+    } catch (error) {
+        console.error("Erro ao enviar mensagem:", error);
+        res.status(500).send({ msg: "Erro no servidor" });
+    }
 });
 
 // .
@@ -64,7 +70,8 @@ app.put("/sala/entrar", async (req, res) => {
 });
 
 app.get("/sala/mensagens", async (req, res) => {
-    if(!tokens.checkToken(req.headers.token, req.headers.iduser, req.headers.nick)) return res.status(401).send({ msg: "Usuário não autorizado" });
+    if(!tokens.checkToken(req.headers.token, req.headers.iduser, req.headers.nick))
+        return res.status(401).send({ msg: "Usuário não autorizado" });
     let resp = await salaController.buscarMensagens(req.query.idSala, req.query.timestamp);
     res.status(200).send(resp);
 });
